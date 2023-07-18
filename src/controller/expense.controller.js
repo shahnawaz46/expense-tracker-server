@@ -94,7 +94,6 @@ export const addTransaction = async (req, res) => {
       recent_transaction: newTransaction.transactions,
       chart_data: newTransaction.chart_data[year],
     });
-    
   } catch (err) {
     console.log(err);
     return res.status(500).json({ msg: "Internal Server Error" });
@@ -106,11 +105,13 @@ export const getRecentTransaction = async (req, res) => {
     const { _id, year } = req.query;
     const allTransactions = await expenseModal.findOne(
       { userId: _id },
-      { transactions: { $slice: -5 } } // this line means slice last 15 results from transactions Array.
+      { transactions: { $slice: -15 } } // this line means slice last 15 results from transactions Array.
     );
 
-    if(!allTransactions){
-      return res.status(404).json({msg:"Not Data Found Please Add Transaction"})
+    if (!allTransactions) {
+      return res
+        .status(404)
+        .json({ msg: "Not Data Found Please Add Transaction" });
     }
 
     const reverseTransactions = allTransactions.transactions.reverse();
@@ -118,6 +119,38 @@ export const getRecentTransaction = async (req, res) => {
     return res.status(200).json({
       recent_transaction: reverseTransactions,
       chart_data: allTransactions.chart_data[year],
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ msg: "Internal Server Error", err });
+  }
+};
+
+export const deleteTransaction = async (req, res) => {
+  try {
+    const { _id, transactionId, date, price } = req.body;
+    const [day, month, year] = date.split("/");
+
+    // deleting the transaction from the transaction array by _id
+    await expenseModal.findOneAndUpdate(
+      { userId: _id },
+      {
+        $pull: { transactions: { _id: transactionId } },
+      },
+      { new: true }
+    );
+
+    // decrement the value from the chart_data object by year and month
+    const label = chart_array[parseInt(month) - 1].label;
+    const updatedChartData = await expenseModal.findOneAndUpdate(
+      { userId: _id, ["chart_data." + year + ".label"]: label },
+      { $inc: {["chart_data." + year + ".$.value"]: -price} },
+      { new: true }
+    );
+
+    return res.status(200).json({
+      recent_transaction: updatedChartData.transactions.slice(-15),
+      chart_data: updatedChartData.chart_data[year],
     })
 
   } catch (err) {

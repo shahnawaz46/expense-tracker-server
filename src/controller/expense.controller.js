@@ -1,29 +1,29 @@
-import expenseModal from "../models/expense.model.js";
-import lodash from "lodash";
+import expenseModal from '../models/expense.model.js';
+import lodash from 'lodash';
 const { cloneDeep } = lodash;
 
 const chart_array = [
-  { label: "Jan", value: 0 },
-  { label: "Feb", value: 0 },
-  { label: "Mar", value: 0 },
-  { label: "Apr", value: 0 },
-  { label: "May", value: 0 },
-  { label: "Jun", value: 0 },
-  { label: "Jul", value: 0 },
-  { label: "Aug", value: 0 },
-  { label: "Sep", value: 0 },
-  { label: "Oct", value: 0 },
-  { label: "Nov", value: 0 },
-  { label: "Dec", value: 0 },
+  { label: 'Jan', value: 0 },
+  { label: 'Feb', value: 0 },
+  { label: 'Mar', value: 0 },
+  { label: 'Apr', value: 0 },
+  { label: 'May', value: 0 },
+  { label: 'Jun', value: 0 },
+  { label: 'Jul', value: 0 },
+  { label: 'Aug', value: 0 },
+  { label: 'Sep', value: 0 },
+  { label: 'Oct', value: 0 },
+  { label: 'Nov', value: 0 },
+  { label: 'Dec', value: 0 },
 ];
 
 export const addTransaction = async (req, res) => {
   try {
     const { title, description, price, tag, date, time, _id } = req.body;
-    const [day, month, year] = date.split("/");
+    const [day, month, year] = date.split('/');
 
     if (!title || !description || !price || !tag || !date || !time) {
-      return res.status(400).json({ msg: "Please Fill All The Fields" });
+      return res.status(400).json({ msg: 'Please Fill All The Fields' });
     }
 
     const isAlreadyExist = await expenseModal.findOne({ userId: _id });
@@ -51,10 +51,10 @@ export const addTransaction = async (req, res) => {
         updatedChartData = await expenseModal.findOneAndUpdate(
           {
             userId: _id,
-            ["chart_data." + year + ".label"]: label,
+            ['chart_data.' + year + '.label']: label,
           },
           {
-            $inc: { ["chart_data." + year + ".$.value"]: price },
+            $inc: { ['chart_data.' + year + '.$.value']: price },
           },
           { new: true }
         );
@@ -65,7 +65,7 @@ export const addTransaction = async (req, res) => {
         updatedChartData = await expenseModal.findOneAndUpdate(
           { userId: _id },
           {
-            $set: { ["chart_data." + year]: updated_chart_array },
+            $set: { ['chart_data.' + year]: updated_chart_array },
           },
           { new: true }
         );
@@ -73,9 +73,9 @@ export const addTransaction = async (req, res) => {
 
       const reverseTransactions = updated.transactions.reverse();
       return res.status(200).json({
-        msg: "Transaction Add Successfully",
+        msg: 'Transaction Add Successfully',
         recent_transaction: reverseTransactions,
-        chart_data: updatedChartData.chart_data[year],
+        chart_data: updatedChartData.chart_data[new Date().getFullYear()],
       });
     }
 
@@ -90,13 +90,13 @@ export const addTransaction = async (req, res) => {
     });
 
     return res.status(200).json({
-      msg: "Transaction Add Successfully",
+      msg: 'Transaction Add Successfully',
       recent_transaction: newTransaction.transactions,
-      chart_data: newTransaction.chart_data[year],
+      chart_data: newTransaction.chart_data[new Date().getFullYear()],
     });
   } catch (err) {
     console.log(err);
-    return res.status(500).json({ msg: "Internal Server Error" });
+    return res.status(500).json({ msg: 'Internal Server Error' });
   }
 };
 
@@ -111,7 +111,7 @@ export const getRecentTransaction = async (req, res) => {
     if (!allTransactions) {
       return res
         .status(404)
-        .json({ msg: "Not Data Found Please Add Transaction" });
+        .json({ msg: 'Not Data Found Please Add Transaction' });
     }
 
     const reverseTransactions = allTransactions.transactions.reverse();
@@ -122,14 +122,14 @@ export const getRecentTransaction = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    return res.status(500).json({ msg: "Internal Server Error", err });
+    return res.status(500).json({ msg: 'Internal Server Error', err });
   }
 };
 
 export const deleteTransaction = async (req, res) => {
   try {
     const { _id, transactionId, date, price } = req.body;
-    const [day, month, year] = date.split("/");
+    const [day, month, year] = date.split('/');
 
     // deleting the transaction from the transaction array by _id
     await expenseModal.findOneAndUpdate(
@@ -143,18 +143,17 @@ export const deleteTransaction = async (req, res) => {
     // decrement the value from the chart_data object by year and month
     const label = chart_array[parseInt(month) - 1].label;
     const updatedChartData = await expenseModal.findOneAndUpdate(
-      { userId: _id, ["chart_data." + year + ".label"]: label },
-      { $inc: {["chart_data." + year + ".$.value"]: -price} },
+      { userId: _id, ['chart_data.' + year + '.label']: label },
+      { $inc: { ['chart_data.' + year + '.$.value']: -price } },
       { new: true }
     );
 
     return res.status(200).json({
-      recent_transaction: updatedChartData.transactions.slice(-15),
-      chart_data: updatedChartData.chart_data[year],
-    })
-
+      recent_transaction: updatedChartData.transactions.slice(-15).reverse(),
+      chart_data: updatedChartData.chart_data[new Date().getFullYear()],
+    });
   } catch (err) {
     console.log(err);
-    return res.status(500).json({ msg: "Internal Server Error", err });
+    return res.status(500).json({ msg: 'Internal Server Error', err });
   }
 };

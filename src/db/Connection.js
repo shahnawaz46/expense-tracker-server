@@ -1,19 +1,19 @@
-import mongoose from "mongoose";
-import dotenv from 'dotenv'
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 
-dotenv.config({})
+dotenv.config({});
 
 const Connection = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI, {
-      dbName: "expenseTracker",
-      autoIndex:false
+      dbName: 'expenseTracker',
+      autoIndex: false,
     });
 
-    console.log("Database Connected");
+    console.log('Database Connected');
   } catch (err) {
     console.log(err);
   }
 };
 
-export default Connection
+export default Connection;

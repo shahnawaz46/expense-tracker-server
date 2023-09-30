@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import { Schema, model } from 'mongoose';
 
 const expenseSchema = new Schema(
   {
@@ -44,4 +44,4 @@ const expenseSchema = new Schema(
   { timestamps: true }
 );
 
-export default model("expenses", expenseSchema);
+export default model('expenses', expenseSchema);

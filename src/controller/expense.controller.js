@@ -22,7 +22,7 @@ export const addTransaction = async (req, res) => {
     const { title, description, price, tag, date, time, _id } = req.body;
     const [day, month, year] = date.split('/');
 
-    if (!title || !description || !price || !tag || !date || !time) {
+    if (!title || !price || !tag || !date || !time) {
       return res.status(400).json({ msg: 'Please Fill All The Fields' });
     }
 

@@ -13,6 +13,10 @@ const app = express();
 app.use(express.json());
 app.use(cors({ origin: true }));
 
+app.get('/', (req, res) =>
+  res.status(200).json({ msg: 'greeting from expense tracker server' })
+);
+
 // routes middlewares
 app.use('/api', expenseRouter);
 

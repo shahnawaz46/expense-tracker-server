@@ -60,29 +60,39 @@ export const getRecentTransaction = async (req, res) => {
 
     // Get recent transactions for the user
     const transactions = await Transaction.find({ user: _id })
-      .sort({ transactionDate: -1 })
+      .sort({ createdAt: -1 })
       .limit(15);
 
-    // Sample chart data for the current year
-    const sampleChartData = [
-      { label: "Jan", value: 8 },
-      { label: "Feb", value: 98 },
+    const transactionsCurrentYear = await Transaction.find({
+      user: _id,
+      createdAt: { $gte: new Date(year, 0, 1), $lte: new Date(year, 11, 31) },
+    });
+
+    // chart format
+    const chartData = [
+      { label: "Jan", value: 0 },
+      { label: "Feb", value: 0 },
       { label: "Mar", value: 0 },
-      { label: "Apr", value: 210 },
-      { label: "May", value: 2800 },
-      { label: "Jun", value: 1900 },
-      { label: "Jul", value: 3400 },
-      { label: "Aug", value: 2200 },
-      { label: "Sep", value: 2600 },
-      { label: "Oct", value: 1000 },
-      { label: "Nov", value: 10000 },
-      { label: "Dec", value: 2900 },
+      { label: "Apr", value: 0 },
+      { label: "May", value: 0 },
+      { label: "Jun", value: 0 },
+      { label: "Jul", value: 0 },
+      { label: "Aug", value: 0 },
+      { label: "Sep", value: 0 },
+      { label: "Oct", value: 0 },
+      { label: "Nov", value: 0 },
+      { label: "Dec", value: 0 },
     ];
+
+    transactionsCurrentYear.forEach((transaction) => {
+      const month = transaction.transactionDateTime.getMonth();
+      chartData[month].value += transaction.amount;
+    });
 
     return res.status(200).json({
       success: true,
       recent_transaction: transactions,
-      chart_data: sampleChartData,
+      chart_data: chartData,
     });
   } catch (err) {
     console.log("Get recent transactions error:", err);

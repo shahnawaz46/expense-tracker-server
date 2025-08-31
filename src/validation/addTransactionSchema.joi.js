@@ -11,7 +11,7 @@ export const addTransactionSchema = Joi.object({
     "string.max": "Title cannot exceed 100 characters",
     "any.required": "Transaction title is required",
   }),
-  description: Joi.string().trim().max(5000).messages({
+  description: Joi.string().trim().max(5000).allow("").optional().messages({
     "string.max": "Description cannot exceed 5000 characters",
   }),
   amount: Joi.number().min(1).max(1000000).required().messages({

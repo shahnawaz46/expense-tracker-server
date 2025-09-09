@@ -1,17 +1,23 @@
+// models
 import Transaction from "../models/transaction.model.js";
-import lodash from "lodash";
+
+// constants
+import { API_LIMIT } from "../constants/API.js";
 
 export const getRecentTransactions = async (req, res) => {
   try {
     const { _id, year } = req.query;
 
     const recentTransactions = await Transaction.find({ user: _id })
-      .sort({ createdAt: -1 })
+      .sort({ transactionDateTime: -1 })
       .limit(15);
 
     const transactionsCurrentYear = await Transaction.find({
       user: _id,
-      createdAt: { $gte: new Date(year, 0, 1), $lte: new Date(year, 11, 31) },
+      transactionDateTime: {
+        $gte: new Date(year, 0, 1),
+        $lte: new Date(year, 11, 31),
+      },
     });
 
     // chart format
@@ -53,11 +59,15 @@ export const getRecentTransactions = async (req, res) => {
 
 export const getAllTransactions = async (req, res) => {
   try {
-    const { _id } = req.query;
+    const { _id, page } = req.query;
+    // console.log("getAllTransactions", _id, page);
 
-    const transactions = await Transaction.find({ user: _id }).sort({
-      createdAt: -1,
-    });
+    const transactions = await Transaction.find({ user: _id })
+      .sort({
+        transactionDateTime: -1,
+      })
+      .limit(API_LIMIT)
+      .skip((page - 1) * API_LIMIT);
 
     return res.status(200).json({
       success: true,
@@ -75,6 +85,7 @@ export const getAllTransactions = async (req, res) => {
 export const addTransaction = async (req, res) => {
   try {
     const transactionData = req.body;
+    // console.log("addTransaction", transactionData);
 
     // Create new transaction
     const newTransaction = await Transaction.create(transactionData);
@@ -165,6 +176,7 @@ export const getFilteredTransactions = async (req, res) => {
       endDate,
       minAmount,
       maxAmount,
+      page,
     } = req.query;
 
     // create filter object
@@ -194,7 +206,10 @@ export const getFilteredTransactions = async (req, res) => {
       if (maxAmount) filter.amount.$lte = parseFloat(maxAmount);
     }
 
-    const transactions = await Transaction.find(filter).sort({ createdAt: -1 });
+    const transactions = await Transaction.find(filter)
+      .sort({ transactionDateTime: -1 })
+      .limit(API_LIMIT)
+      .skip((page - 1) * API_LIMIT);
 
     return res.status(200).json({
       success: true,
@@ -202,6 +217,27 @@ export const getFilteredTransactions = async (req, res) => {
     });
   } catch (err) {
     console.log("Get filtered transactions error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
+// get insights data
+export const getInsightsData = async (req, res) => {
+  try {
+    const { _id } = req.query;
+    console.log("getInsightsData", _id);
+    return {
+      success: true,
+      data: {
+        totalSpent: 5000,
+        averageMonthly: 5000,
+      },
+    };
+  } catch (err) {
+    console.log("Get insights data error:", err);
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",

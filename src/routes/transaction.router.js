@@ -1,4 +1,6 @@
 import express from "express";
+
+// controllers
 import {
   addTransaction,
   deleteTransaction,
@@ -8,6 +10,8 @@ import {
   getTagsAndPaymentMethods,
   getInsightsData,
 } from "../controller/transaction.controller.js";
+
+// middleware
 import { validateRequest } from "../middleware/validateRequest.joi.js";
 import { addTransactionSchema } from "../validation/addTransactionSchema.joi.js";
 

@@ -53,5 +53,9 @@ const transactionSchema = new Schema(
   { timestamps: true }
 );
 
+// compound indexes
+transactionSchema.index({ user: 1, transactionDateTime: 1 });
+transactionSchema.index({ user: 1, tag: 1 });
+
 const Transaction = model("Transaction", transactionSchema);
 export default Transaction;

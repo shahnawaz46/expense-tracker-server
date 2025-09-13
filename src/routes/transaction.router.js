@@ -9,6 +9,8 @@ import {
   getRecentTransactions,
   getTagsAndPaymentMethods,
   getInsightsData,
+  getCategoryDonutData,
+  getYearlyAreaChartData,
 } from "../controller/transaction.controller.js";
 
 // middleware
@@ -27,5 +29,7 @@ router.get("/tags-payment-methods", getTagsAndPaymentMethods);
 router.get("/filtered", getFilteredTransactions);
 
 router.get("/insights", getInsightsData);
+router.get("/category-donut", getCategoryDonutData);
+router.get("/yearly-area-chart", getYearlyAreaChartData);
 
 export default router;

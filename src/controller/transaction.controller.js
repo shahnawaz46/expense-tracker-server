@@ -277,6 +277,11 @@ export const getInsightsData = async (req, res) => {
       yearlySpendingOverview.find((year) => year.label === currentYear)
         ?.value || 0;
 
+    // for yearly area chart
+    const yearlySpending = yearlySpendingOverview.sort(
+      (a, b) => a.label - b.label
+    );
+
     // second aggregation for graph data(pie chart, line chart, bar chart)
     const graphData = await Transaction.aggregate([
       {
@@ -347,6 +352,7 @@ export const getInsightsData = async (req, res) => {
         },
         allTimeCategoryDonut: allTimeCategoryDonut,
         currentYearLineChart: currentYearLineChartFormatted,
+        yearlySpending,
       },
     });
   } catch (err) {
@@ -405,7 +411,7 @@ export const getCategoryDonutData = async (req, res) => {
 };
 
 // get yearly area chart data
-export const getYearlyAreaChartData = async (req, res) => {
+export const getMonthlyAreaChartData = async (req, res) => {
   try {
     const { _id, year } = req.query;
 

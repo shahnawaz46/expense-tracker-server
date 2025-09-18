@@ -5,16 +5,20 @@ import Transaction from "../models/transaction.model.js";
 import { API_LIMIT } from "../constants/API.js";
 import { getMonthlyTemplate } from "../utils/Chart.js";
 
+// utils
+import { toObjectId } from "../utils/mongoose.js";
+
 export const getRecentTransactions = async (req, res) => {
   try {
-    const { _id, year } = req.query;
+    const { year } = req.query;
+    const userId = toObjectId(req.userId);
 
-    const recentTransactions = await Transaction.find({ user: _id })
+    const recentTransactions = await Transaction.find({ user: userId })
       .sort({ transactionDateTime: -1 })
       .limit(15);
 
     const transactionsCurrentYear = await Transaction.find({
-      user: _id,
+      user: userId,
       transactionDateTime: {
         $gte: new Date(year, 0, 1),
         $lte: new Date(year, 11, 31),
@@ -60,9 +64,10 @@ export const getRecentTransactions = async (req, res) => {
 
 export const getAllTransactions = async (req, res) => {
   try {
-    const { _id, page } = req.query;
+    const { page } = req.query;
+    const userId = toObjectId(req.userId);
 
-    const transactions = await Transaction.find({ user: _id })
+    const transactions = await Transaction.find({ user: userId })
       .sort({
         transactionDateTime: -1,
       })
@@ -84,9 +89,12 @@ export const getAllTransactions = async (req, res) => {
 
 export const addTransaction = async (req, res) => {
   try {
-    const transactionData = req.body;
+    const transactionData = {
+      ...req.body,
+      user: req.userId,
+    };
 
-    // Create new transaction
+    // create new transaction
     const newTransaction = await Transaction.create(transactionData);
 
     return res.status(201).json({
@@ -106,10 +114,12 @@ export const addTransaction = async (req, res) => {
 export const deleteTransaction = async (req, res) => {
   try {
     const { transactionId } = req.params;
+    const userId = toObjectId(req.userId);
 
-    const deletedTransaction = await Transaction.findByIdAndDelete(
-      transactionId
-    );
+    const deletedTransaction = await Transaction.findOneAndDelete({
+      _id: transactionId,
+      user: userId,
+    });
 
     if (!deletedTransaction) {
       return res.status(404).json({
@@ -131,22 +141,22 @@ export const deleteTransaction = async (req, res) => {
   }
 };
 
-// Get available tags from the schema
+// get available tags from the schema
 export const getTagsAndPaymentMethods = async (req, res) => {
   try {
-    // Get tags from the Transaction schema
+    // get tags from the Transaction schema
     const tagEnum = Transaction.schema.path("tag").enumValues;
     const paymentMethodEnum =
       Transaction.schema.path("paymentMethod").enumValues;
 
     const tags = tagEnum.map((tag) => ({
       id: tag,
-      name: tag.charAt(0).toUpperCase() + tag.slice(1), // Capitalize first letter
+      name: tag.charAt(0).toUpperCase() + tag.slice(1), // capitalize first letter
     }));
 
     const paymentMethods = paymentMethodEnum.map((method) => ({
       id: method,
-      name: method.charAt(0).toUpperCase() + method.slice(1), // Capitalize first letter
+      name: method.charAt(0).toUpperCase() + method.slice(1), // capitalize first letter
     }));
 
     return res.status(200).json({
@@ -163,11 +173,10 @@ export const getTagsAndPaymentMethods = async (req, res) => {
   }
 };
 
-// Get filtered transactions
+// get filtered transactions
 export const getFilteredTransactions = async (req, res) => {
   try {
     const {
-      _id,
       search,
       tag,
       paymentMethod,
@@ -177,9 +186,10 @@ export const getFilteredTransactions = async (req, res) => {
       maxAmount,
       page,
     } = req.query;
+    const userId = toObjectId(req.userId);
 
     // create filter object
-    const filter = { user: _id };
+    const filter = { user: userId };
 
     if (search) {
       const searchRegex = new RegExp(search, "i");
@@ -228,11 +238,11 @@ export const getInsightsData = async (req, res) => {
   const currentYear = new Date().getFullYear();
 
   try {
-    const { _id } = req.query;
+    const userId = toObjectId(req.userId);
 
     // first aggregation for overview data
     const insightsData = await Transaction.aggregate([
-      { $match: { user: _id } },
+      { $match: { user: userId } },
       {
         $facet: {
           overview: [
@@ -266,7 +276,11 @@ export const getInsightsData = async (req, res) => {
     ]);
 
     const { overview, yearlySpendingOverview } = insightsData[0];
-    const { totalSpent, totalTransactions, largestTransaction } = overview[0];
+    const {
+      totalSpent = 0,
+      totalTransactions = 0,
+      largestTransaction = 0,
+    } = overview?.[0] || {};
 
     // peak year data
     const { label: peakYear, value: peakYearSpent } =
@@ -285,7 +299,7 @@ export const getInsightsData = async (req, res) => {
     // second aggregation for graph data(pie chart, line chart, bar chart)
     const graphData = await Transaction.aggregate([
       {
-        $match: { user: _id },
+        $match: { user: userId },
       },
       {
         $facet: {
@@ -370,9 +384,10 @@ export const getCategoryDonutData = async (req, res) => {
   const currentMonth = new Date().getMonth();
   try {
     // key can be allYear, currentYear, currentMonth
-    const { _id, key } = req.query;
+    const { key } = req.query;
+    const userId = toObjectId(req.userId);
 
-    let filer = { user: _id };
+    let filer = { user: userId };
     if (key === "currentYear") {
       filer.transactionDateTime = {
         $gte: new Date(currentYear, 0, 1),
@@ -413,12 +428,13 @@ export const getCategoryDonutData = async (req, res) => {
 // get yearly area chart data
 export const getMonthlyAreaChartData = async (req, res) => {
   try {
-    const { _id, year } = req.query;
+    const { year } = req.query;
+    const userId = toObjectId(req.userId);
 
     const yearlyAreaChartData = await Transaction.aggregate([
       {
         $match: {
-          user: _id,
+          user: userId,
           transactionDateTime: {
             $gte: new Date(year, 0, 1),
             $lte: new Date(year, 11, 31, 23, 59, 59, 999),

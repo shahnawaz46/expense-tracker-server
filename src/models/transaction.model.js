@@ -7,9 +7,8 @@ import {
 const transactionSchema = new Schema(
   {
     user: {
-      // type: Schema.Types.ObjectId,
-      // ref: "User",
-      type: String,
+      type: Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
     title: {
@@ -54,8 +53,8 @@ const transactionSchema = new Schema(
 );
 
 // compound indexes
-transactionSchema.index({ user: 1, transactionDateTime: 1 });
-transactionSchema.index({ user: 1, tag: 1 });
+// transactionSchema.index({ user: 1, transactionDateTime: 1 });
+// transactionSchema.index({ user: 1, tag: 1 });
 
 const Transaction = model("Transaction", transactionSchema);
 export default Transaction;

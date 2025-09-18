@@ -1,4 +1,3 @@
-// utils/chartUtils.js
 export const getMonthlyTemplate = () => [
   { label: "Jan", value: 0 },
   { label: "Feb", value: 0 },

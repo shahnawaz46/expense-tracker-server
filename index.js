@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import transactionRouter from "./src/routes/transaction.router.js";
+import authRouter from "./src/routes/auth.router.js";
 // import { errorHandler } from "./src/validation/addTransactionSchema.joi.js";
 
 // dotenv
@@ -18,11 +19,8 @@ const app = express();
 app.use(express.json());
 app.use(cors({ origin: true }));
 
-app.get("/", (req, res) =>
-  res.status(200).json({ msg: "greeting from expense tracker server" })
-);
-
-// routes middlewares
+// routes
+app.use("/api/auth", authRouter);
 app.use("/api/transaction", transactionRouter);
 
 // Error handling middleware (must be last)

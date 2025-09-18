@@ -14,10 +14,16 @@ import {
 } from "../controller/transaction.controller.js";
 
 // middleware
-import { validateRequest } from "../middleware/validateRequest.joi.js";
-import { addTransactionSchema } from "../validation/addTransactionSchema.joi.js";
+import { validateRequest } from "../middleware/validateRequest.middleware.joi.js";
+import { authenticateToken } from "../middleware/auth.middleware.js";
+
+// validation schemas
+import { addTransactionSchema } from "../validation/transactionValidation.joi.js";
 
 const router = express.Router();
+
+// middleware to authenticate token for all routes below this
+router.use(authenticateToken);
 
 router.get("/recent_transactions", getRecentTransactions);
 

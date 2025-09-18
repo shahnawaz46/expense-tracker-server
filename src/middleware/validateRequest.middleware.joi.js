@@ -1,5 +1,3 @@
-// Validation middleware
-
 export const validateRequest = (schema) => {
   return (req, res, next) => {
     // console.log("req.body:", req.body);

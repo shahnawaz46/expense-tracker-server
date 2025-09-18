@@ -38,45 +38,4 @@ export const addTransactionSchema = Joi.object({
       "any.only": "Please select a valid payment method",
       "any.required": "Payment method is required",
     }),
-  user: Joi.string().required().messages({
-    "any.required": "User ID is required",
-  }),
 });
-
-// Error handling middleware
-// export const errorHandler = (err, req, res, next) => {
-//   console.error("Error:", err);
-
-//   // Joi validation errors
-//   if (err.isJoi) {
-//     return res.status(400).json({
-//       success: false,
-//       message: "Validation failed",
-//       errors: err.details.map((detail) => detail.message),
-//     });
-//   }
-
-//   // MongoDB duplicate key error
-//   if (err.code === 11000) {
-//     return res.status(400).json({
-//       success: false,
-//       message: "Duplicate entry found",
-//     });
-//   }
-
-//   // MongoDB validation errors
-//   if (err.name === "ValidationError") {
-//     const errors = Object.values(err.errors).map((error) => error.message);
-//     return res.status(400).json({
-//       success: false,
-//       message: "Validation failed",
-//       errors,
-//     });
-//   }
-
-//   // Default error
-//   res.status(500).json({
-//     success: false,
-//     message: "Internal server error",
-//   });
-// };

@@ -271,16 +271,36 @@ export const getInsightsData = async (req, res) => {
               },
             },
           ],
+          userInfo: [
+            {
+              $lookup: {
+                from: "users",
+                localField: "user",
+                foreignField: "_id",
+                as: "user",
+              },
+            },
+            { $unwind: "$user" },
+            {
+              $project: {
+                _id: 0,
+                createdAt: "$user.createdAt",
+              },
+            },
+          ],
         },
       },
     ]);
 
-    const { overview, yearlySpendingOverview } = insightsData[0];
+    const { overview, yearlySpendingOverview, userInfo } = insightsData[0];
     const {
       totalSpent = 0,
       totalTransactions = 0,
       largestTransaction = 0,
     } = overview?.[0] || {};
+
+    const userJoinedDate = userInfo?.[0]?.createdAt;
+    const userJoinedYear = new Date(userJoinedDate).getFullYear();
 
     // peak year data
     const { label: peakYear, value: peakYearSpent } =
@@ -364,6 +384,7 @@ export const getInsightsData = async (req, res) => {
           totalTransactions,
           currentYearSpent,
         },
+        userJoinedYear,
         allTimeCategoryDonut: allTimeCategoryDonut,
         currentYearLineChart: currentYearLineChartFormatted,
         yearlySpending,

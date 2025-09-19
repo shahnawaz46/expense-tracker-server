@@ -15,18 +15,14 @@ const transactionSchema = new Schema(
       type: String,
       required: [true, "Transaction title is required"],
       trim: true,
-      maxlength: [100, "Title cannot be more than 100 characters"],
     },
     description: {
       type: String,
       trim: true,
-      maxlength: [5000, "Description cannot be more than 5000 characters"],
     },
     amount: {
       type: Number,
       required: [true, "Transaction amount is required"],
-      min: [1, "Amount must be at least 1"],
-      max: [1000000, "Amount cannot exceed 10,00,000"],
     },
     transactionDateTime: {
       type: Date,
@@ -42,10 +38,10 @@ const transactionSchema = new Schema(
     },
     tag: {
       type: String,
-      required: [true, "Transaction category is required"],
+      required: [true, "Transaction tag is required"],
       enum: {
         values: TransactionTags,
-        message: "Please select a valid category",
+        message: "Please select a valid tag",
       },
     },
   },

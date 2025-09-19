@@ -14,10 +14,10 @@ export const addTransactionSchema = Joi.object({
   description: Joi.string().trim().max(5000).allow("").optional().messages({
     "string.max": "Description cannot exceed 5000 characters",
   }),
-  amount: Joi.number().min(1).max(1000000).required().messages({
+  amount: Joi.number().min(1).max(1000000000).required().messages({
     "number.base": "Amount must be a valid number",
     "number.min": "Amount must be at least 1",
-    "number.max": "Amount cannot exceed 10,00,000",
+    "number.max": "Amount cannot exceed 10,00,00,0000",
     "any.required": "Transaction amount is required",
   }),
   tag: Joi.string()
